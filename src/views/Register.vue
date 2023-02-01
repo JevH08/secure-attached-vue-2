@@ -40,35 +40,34 @@ export default {
     userRegister: function () {
       axios.post("http://localhost:3000/user/register", this.form)
         .then((res) => {
-          alert(res.data.msg);
-          // if (res.data.msg === "Validation Failed") {
-          //   let errors = res.data.errors;
-          //   let errorMsg = "";
-          //   if (errors.email.length != 0) {
-          //     for (let i = 0; i < errors.email.length; i++) {
-          //       errorMsg += `${errors.email[i]}\n`;
-          //     }
-          //   }
-          //   if (errors.username.length != 0) {
-          //     for (let i = 0; i < errors.username.length; i++) {
-          //       errorMsg += `${errors.username[i]}\n`;
-          //     }
-          //   }
-          //   if (errors.password.length != 0) {
-          //     for (let i = 0; i < errors.password.length; i++) {
-          //       errorMsg += `${errors.password[i]}\n`;
-          //     }
-          //   }
-          //   if (errors.rePassword.length != 0) {
-          //     for (let i = 0; i < errors.rePassword.length; i++) {
-          //       errorMsg += `${errors.rePassword[i]}\n`;
-          //     }
-          //   }
-          //   alert(errorMsg);
-          // }
-          // else {
-          //   alert("Successfully Registered");
-          // }
+          if (res.data.msg === "Validation Failed") {
+            let errors = res.data.errors;
+            let errorMsg = "";
+            if (errors.email.length != 0) {
+              for (let i = 0; i < errors.email.length; i++) {
+                errorMsg += `${errors.email[i]}\n`;
+              }
+            }
+            if (errors.username.length != 0) {
+              for (let i = 0; i < errors.username.length; i++) {
+                errorMsg += `${errors.username[i]}\n`;
+              }
+            }
+            if (errors.password.length != 0) {
+              for (let i = 0; i < errors.password.length; i++) {
+                errorMsg += `${errors.password[i]}\n`;
+              }
+            }
+            if (errors.rePassword.length != 0) {
+              for (let i = 0; i < errors.rePassword.length; i++) {
+                errorMsg += `${errors.rePassword[i]}\n`;
+              }
+            }
+            alert(errorMsg);
+          }
+          else {
+            alert("Successfully Registered");
+          }
         }).catch((error) => {
           console.log(error);
         })
