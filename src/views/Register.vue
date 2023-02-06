@@ -40,7 +40,7 @@ export default {
     userRegister: function () {
       axios.post("http://localhost:3000/user/register", this.form)
         .then((res) => {
-          if (res.data.msg === "Validation Failed") {
+          if (res.data.message === "Validation Failed") {
             let errors = res.data.errors;
             let errorMsg = "";
             if (errors.email.length != 0) {
@@ -66,7 +66,9 @@ export default {
             alert(errorMsg);
           }
           else {
-            alert("Successfully Registered");
+            alert("Successfully registered. You can now login");
+
+            window.location.href = 'http://localhost:5173/';
           }
         }).catch((error) => {
           console.log(error);
