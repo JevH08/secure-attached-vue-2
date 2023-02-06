@@ -67,14 +67,14 @@ export default {
           }
           else {
             alert("Logged In Successfully.");
-            // if(res.data.message === "Logged In Succesfully"){
-            //   let pengguna = res.data.pengguna;
-            //   let email = pengguna.email_content;
-            //   let username = pengguna.username_content;
-            //   Vue.$cookies.set("email", email, "14d");
-            //   Vue.$cookies.set("username", username, "14d");
-            // }
-            window.location.href = 'http://localhost:5173/register';
+            if(res.data.message === "Logged In Succesfully"){
+              let pengguna = res.data.pengguna;
+              let email = pengguna.email_content;
+              let username = pengguna.username_content;
+              // Vue.$cookies.set("email", email, "14d");
+              // Vue.$cookies.set("username", username, "14d");
+            }
+            window.location.href = 'http://localhost:5173/generate';
           }
         }).catch((error) => {
           console.log(error);
