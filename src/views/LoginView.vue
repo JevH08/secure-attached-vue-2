@@ -17,16 +17,16 @@
 <script>
 import axios from 'axios';
 import Vue from 'vue'
-import VueCookie from 'vue-cookie'
+// import VueCookie from 'vue-cookie'
 
-//cookies default value
-Vue.use(VueCookie, { 
-  expires: '1d', 
-  path: '/', 
-  domain: '', 
-  secure: '', 
-  sameSite: 'Lax' 
-})
+// pindah ke main.js
+// Vue.use(VueCookie, { 
+//   expires: '1d', 
+//   path: '/', 
+//   domain: '', 
+//   secure: '', 
+//   sameSite: 'Lax' 
+// })
 
 // if($cookies.isKey("username")){
 //     console.log(Vue.$cookies.get("username"))
@@ -71,8 +71,9 @@ export default {
               let pengguna = res.data.pengguna;
               let email = pengguna.email_content;
               let username = pengguna.username_content;
-              // Vue.$cookies.set("email", email, "14d");
-              // Vue.$cookies.set("username", username, "14d");
+              Vue.$cookies.set("email", email, "14d");
+              Vue.$cookies.set("username", username, "14d");
+              alert($cookies.keys)
             }
             window.location.href = 'http://localhost:5173/generate';
           }

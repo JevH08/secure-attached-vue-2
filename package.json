@@ -15,6 +15,7 @@
     "querystring": "^0.2.1",
     "vue": "^2.7.7",
     "vue-cookie": "^1.1.4",
+    "vue-cookies": "^1.8.2",
     "vue-router": "^3.5.4",
     "webpack-assets-manifest": "^5.1.0"
   },
