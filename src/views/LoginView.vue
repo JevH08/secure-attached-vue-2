@@ -69,10 +69,12 @@ export default {
             alert("Logged In Successfully.");
             if(res.data.message === "Logged In Succesfully"){
               let pengguna = res.data.pengguna;
+              let id = pengguna.id_content;
               let email = pengguna.email_content;
               let username = pengguna.username_content;
-              Vue.$cookies.set("email", email, "14d");
-              Vue.$cookies.set("username", username, "14d");
+              Vue.$cookies.set("id_user", id, "14d");
+              Vue.$cookies.set("email_user", email, "14d");
+              Vue.$cookies.set("username_user", username, "14d");
               alert($cookies.keys)
             }
             window.location.href = 'http://localhost:5173/generate';
