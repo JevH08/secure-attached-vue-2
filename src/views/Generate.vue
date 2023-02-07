@@ -18,7 +18,7 @@
 
 <script>
 import axios from 'axios';
-import { Buffer } from 'buffer';
+import { Buffer } from 'buffer'; //buffer untuk encode decode base64
 import FileSaver  from 'file-saver';
 globalThis.Buffer = Buffer
 
