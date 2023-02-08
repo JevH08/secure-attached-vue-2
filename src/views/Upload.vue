@@ -7,6 +7,8 @@
         <input type="text" v-model="form.email" /><br />
         <label for="file">File : </label>
         <input type="file" ref="file" v-on:change="handleFileUpload()" /><br />
+        <label for="email">File Password: </label>
+        <input type="text" v-model="form.passwordFile" /><br />
         <input type="button" value="Upload" v-on:click="upload()" /><br />
       </form>
     <Footer />
@@ -16,6 +18,7 @@
 
 <script>
 import axios from 'axios';
+import Vue from 'vue'
 
 const headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -28,6 +31,7 @@ export default {
     return {
       form: {
         email: '',
+        passwordFile: '',
         file: null
       }
     }
@@ -37,9 +41,12 @@ export default {
       this.form.file = this.$refs.file.files[0];
     },
     upload: function () {
+      const cookieIDpengirim = Vue.$cookies.get("id_user");
       const formData = new FormData();
       formData.append('file', this.form.file);
       formData.append('email', this.form.email);
+      formData.append('passwordFile', this.form.passwordFile);
+      formData.append('id_pengirim', cookieIDpengirim);
       alert(formData);
       axios.post("http://localhost:3000/file/encryption", formData,
       {
@@ -58,17 +65,7 @@ export default {
           alert(errorMsg);
         }
         else {
-          let keys = res.data.key;
-          let privateKeyEncoded = keys.private;
-          let publicKeyEncoded = keys.public;
-
-          let privateKeyDecoded = Buffer.from(privateKeyEncoded, 'base64').toString('ascii');
-          var blob = new Blob([privateKeyDecoded], {type: "text/plain;charset=utf-8"});
-          FileSaver.saveAs(blob, "privatekey");
-
-          let publicKeyDecoded = Buffer.from(publicKeyEncoded, 'base64').toString('ascii');
-          var blob = new Blob([publicKeyDecoded], {type: "text/plain;charset=utf-8"});
-          FileSaver.saveAs(blob, "publickey");
+          alert("Successfully Uploaded. (jangan lupa tambah akses link)")
           //gg ini berhasil
         }
       }).catch((error) => {

@@ -75,7 +75,6 @@ export default {
               Vue.$cookies.set("id_user", id, "14d");
               Vue.$cookies.set("email_user", email, "14d");
               Vue.$cookies.set("username_user", username, "14d");
-              alert($cookies.keys)
             }
             window.location.href = 'http://localhost:5173/generate';
           }
