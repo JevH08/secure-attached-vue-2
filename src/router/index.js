@@ -42,6 +42,11 @@ const router = new VueRouter({
       name: 'history',
       component: () => import('../views/History.vue')
     },
+    {
+      path: '/download',
+      name: 'download',
+      component: () => import('../views/Decrypt.vue')
+    },
   ]
 })
 

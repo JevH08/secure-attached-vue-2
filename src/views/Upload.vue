@@ -20,9 +20,9 @@
 import axios from 'axios';
 import Vue from 'vue'
 
-const headers = {
-  'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-}
+// const headers = {
+//   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+// }
 // const headers = { 'Content-Type': 'multipart/form-data' };
 
 export default {
@@ -47,7 +47,6 @@ export default {
       formData.append('email', this.form.email);
       formData.append('passwordFile', this.form.passwordFile);
       formData.append('id_pengirim', cookieIDpengirim);
-      alert(formData);
       axios.post("http://localhost:3000/file/encryption", formData,
       {
         headers: {
