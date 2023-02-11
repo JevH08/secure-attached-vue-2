@@ -49,8 +49,7 @@ export default {
       {
         headers: {
           'Content-Type': 'multipart/form-data'
-        }, 
-        responseType: 'blob'
+        }
       }).then((res) => {
         if (res.data.message === "Validation Failed") {
           let errors = res.data.errors;
@@ -63,13 +62,17 @@ export default {
           alert(errorMsg);
         }
         else {
-          let decryptedFile = res.data.file;
-          console.log(decryptedFile);
-
-          // let arraybuffer = Uint8Array.from(decryptedFile).buffer;
-          // console.log(arraybuffer);
-
-          FileSaver.saveAs(decryptedFile, "download.zip");
+          let download_link = res.data.download_link;
+          axios({
+              method: 'get',
+              url: 'http://localhost:3000/download/' + download_link,
+              responseType: 'blob'
+            })
+              .then(function (response) {
+                console.log(response.data);
+                var blob = new Blob([response.data], {type: "application/zip"});
+                FileSaver.saveAs(blob, "download.zip");
+              });
           //gg ini berhasil
         }
       }).catch((error) => {
