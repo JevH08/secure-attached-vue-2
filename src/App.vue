@@ -6,6 +6,7 @@
     <div class="container-main">
       <body class="body-location">
         <router-view />
+        
       </body>
     </div>
   </div>

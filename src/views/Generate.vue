@@ -11,7 +11,17 @@
         <input type="text" v-model="form.passphrase" /><br />
         <input type="button" value="Generate Key" v-on:click="generateKey()" /><br />
       </form>
-    <Footer />
+    
+      <footer class="position-absolute top-0 start-50 translate-middle">
+        <b-container class="bv-example-row fixed-bottom">
+            <b-row class="foot justify-content-evenly ">
+                <!-- <b-col class="item"><router-link class="dark-blue" to="/">Home</router-link></b-col> -->
+                <b-col class="item"><router-link class="dark-blue" to="/generate">Generate Key</router-link></b-col>
+                <b-col class="item"><router-link class="dark-blue" to="/upload/new">Upload</router-link></b-col>
+                <b-col class="item"><router-link class="dark-blue" to="/download">Download</router-link></b-col>
+            </b-row>
+        </b-container>
+    </footer>
     </div>
   </main>
 </template>
@@ -20,6 +30,7 @@
 import axios from 'axios';
 import { Buffer } from 'buffer'; //buffer untuk encode decode base64
 import FileSaver  from 'file-saver';
+import Vue from 'vue';
 globalThis.Buffer = Buffer
 
 const headers = {
@@ -29,11 +40,13 @@ const headers = {
 export default {
   name: "Generate",
   data() {
+    const cookieIDpengirim = Vue.$cookies.get("id_user");
     return {
       form: {
         email: '',
         username: '',
-        passphrase: ''
+        passphrase: '',
+        fk_pengguna: cookieIDpengirim
       }
     }
   },
@@ -41,6 +54,7 @@ export default {
     generateKey: function () {
       axios.post("http://localhost:3000/key/generate", this.form)
         .then((res) => {
+          console.log(res);
           if (res.data.message === "Validation Failed") {
             let errors = res.data.errors;
             let errorMsg = "";
@@ -55,6 +69,8 @@ export default {
               }
             }
             alert(errorMsg);
+          }else if (res.data.message === "Logged in User and email mismatch") {
+            alert("User yang login berbeda dengan email yang didaftarkan");
           }
           else {
             let keys = res.data.key;

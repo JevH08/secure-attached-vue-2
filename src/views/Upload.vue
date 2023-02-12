@@ -11,14 +11,24 @@
         <input type="text" v-model="form.passwordFile" /><br />
         <input type="button" value="Upload" v-on:click="upload()" /><br />
       </form>
-    <Footer />
+    
+      <footer class="position-absolute top-0 start-50 translate-middle">
+        <b-container class="bv-example-row fixed-bottom">
+            <b-row class="foot justify-content-evenly ">
+                <!-- <b-col class="item"><router-link class="dark-blue" to="/">Home</router-link></b-col> -->
+                <b-col class="item"><router-link class="dark-blue" to="/generate">Generate Key</router-link></b-col>
+                <b-col class="item"><router-link class="dark-blue" to="/upload/new">Upload</router-link></b-col>
+                <b-col class="item"><router-link class="dark-blue" to="/download">Download</router-link></b-col>
+            </b-row>
+        </b-container>
+    </footer>
     </div>
   </main>
 </template>
 
 <script>
 import axios from 'axios';
-import Vue from 'vue'
+import Vue from 'vue';
 
 // const headers = {
 //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
