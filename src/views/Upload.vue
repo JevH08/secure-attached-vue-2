@@ -74,7 +74,8 @@ export default {
           alert(errorMsg);
         }
         else {
-          alert("Successfully Uploaded. (jangan lupa tambah akses link)")
+          let kode_download = res.data.download_link;
+          alert("Upload Sukses! Ini kode download anda : " + kode_download)
           //gg ini berhasil
         }
       }).catch((error) => {
