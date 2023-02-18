@@ -19,9 +19,10 @@
                 <b-col class="item"><router-link class="dark-blue" to="/generate">Generate Key</router-link></b-col>
                 <b-col class="item"><router-link class="dark-blue" to="/upload/new">Upload</router-link></b-col>
                 <b-col class="item"><router-link class="dark-blue" to="/download">Download</router-link></b-col>
+                <b-col class="item"><router-link class="dark-blue" to="/upload/history">History</router-link></b-col>
             </b-row>
         </b-container>
-    </footer>
+      </footer>
     </div>
   </main>
 </template>

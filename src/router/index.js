@@ -23,11 +23,6 @@ const router = new VueRouter({
       component: () => import('../views/MainPage.vue')
     },
     {
-      path: '/forgot',
-      name: 'forgot password',
-      component: () => import('../views/Forgot.vue')
-    },
-    {
       path: '/generate',
       name: 'generate',
       component: () => import('../views/Generate.vue')
