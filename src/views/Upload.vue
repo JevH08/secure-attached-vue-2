@@ -7,7 +7,7 @@
         <input type="text" v-model="form.email" /><br />
         <label for="file">File : </label>
         <input type="file" ref="file" v-on:change="handleFileUpload()" /><br />
-        <label for="email">File Password: </label>
+        <label for="email">File Password (untuk .zip): </label>
         <input type="text" v-model="form.passwordFile" /><br />
         <input type="button" value="Upload" v-on:click="upload()" /><br />
       </form>
@@ -30,6 +30,9 @@
 <script>
 import axios from 'axios';
 import Vue from 'vue';
+import * as openpgp from 'openpgp';
+import { Buffer } from 'buffer'; //buffer untuk encode decode base64
+globalThis.Buffer = Buffer;
 
 // const headers = {
 //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -53,35 +56,111 @@ export default {
     },
     upload: function () {
       const cookieIDpengirim = Vue.$cookies.get("id_user");
-      const formData = new FormData();
-      formData.append('file', this.form.file);
-      formData.append('email', this.form.email);
-      formData.append('passwordFile', this.form.passwordFile);
-      formData.append('id_pengirim', cookieIDpengirim);
-      axios.post("http://localhost:3000/file/encryption", formData,
-      {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-      }).then((res) => {
-        if (res.data.message === "Validation Failed") {
-          let errors = res.data.errors;
-          let errorMsg = "";
-          if (errors.email.length != 0) {
-            for (let i = 0; i < errors.email.length; i++) {
-              errorMsg += `${errors.email[i]}\n`;
-            }
-          }
-          alert(errorMsg);
-        }
-        else {
-          let kode_download = res.data.download_link;
-          alert("Upload Sukses! Ini kode download anda : " + kode_download)
-          //gg ini berhasil
-        }
-      }).catch((error) => {
-        console.log(error);
+      const emailTujuan = this.form.email;
+      const fileToEncrypt = this.form.file;
+      const passwordFile = this.form.passwordFile;
+
+      axios({
+        method: 'get',
+        url: 'http://localhost:3000/getPubKey/' + emailTujuan
       })
+      .then(function (response) {
+        let publicKeyResponse = response.data.pubkey;
+        
+        if(fileToEncrypt.name.includes(".txt")){
+          enkrip();
+          async function enkrip() {
+            let buff = Buffer.from(publicKeyResponse, 'base64');
+            let publicKeyArmored = buff.toString('utf-8');
+            var textRead = await fileToEncrypt.text();
+            var fileName = fileToEncrypt.name;
+
+            const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmored });
+
+            const encrypted = await openpgp.encrypt({
+              message: await openpgp.createMessage({text: textRead}),
+              encryptionKeys: publicKey
+            });
+
+            const formData = new FormData();
+            formData.append('file', encrypted);
+            formData.append('file_name', fileName);
+            formData.append('email', emailTujuan);
+            formData.append('id_pengirim', cookieIDpengirim);
+            axios.post("http://localhost:3000/file/encryption", formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            }).then((res) => {
+              if (res.data.message === "Validation Failed") {
+                let errors = res.data.errors;
+                let errorMsg = "";
+                if (errors.email.length != 0) {
+                  for (let i = 0; i < errors.email.length; i++) {
+                    errorMsg += `${errors.email[i]}\n`;
+                  }
+                }
+                alert(errorMsg);
+              }
+              else {
+                let kode_download = res.data.download_code;
+                alert("Upload Sukses! Ini kode download anda : " + kode_download)
+              }
+            }).catch((error) => {
+              console.log(error);
+            })
+          };
+        }else if(fileToEncrypt.name.includes(".zip")){
+          enkrip();
+          async function enkrip() {
+            var fileName = fileToEncrypt.name;
+            var binaryRead = new Uint8Array(await fileToEncrypt.arrayBuffer());
+            
+            const message = await openpgp.createMessage({ binary: binaryRead });
+            const encrypted = await openpgp.encrypt({
+              message, // input as Message object
+              passwords: [passwordFile], // multiple passwords possible
+              format: 'binary' // don't ASCII armor (for Uint8Array output)
+            });
+
+            var blob_encrypted = new Blob([encrypted]);
+            console.log(blob_encrypted);
+
+            const formData = new FormData();
+            formData.append('file', blob_encrypted);
+            formData.append('email', emailTujuan);
+            formData.append('file_name', fileName);
+            formData.append('id_pengirim', cookieIDpengirim);
+            axios.post("http://localhost:3000/file/encryption", formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              }
+            }).then((res) => {
+              if (res.data.message === "Validation Failed") {
+                let errors = res.data.errors;
+                let errorMsg = "";
+                if (errors.email.length != 0) {
+                  for (let i = 0; i < errors.email.length; i++) {
+                    errorMsg += `${errors.email[i]}\n`;
+                  }
+                }
+                alert(errorMsg);
+              }
+              else {
+                let kode_download = res.data.download_code;
+                alert("Upload Sukses! Ini kode download anda : " + kode_download)
+              }
+            }).catch((error) => {
+              console.log(error);
+            })
+          }
+        }
+      });
+
+      //untuk enkripsi butuh public key berarti butuh mendapatkan public key dari penerima dulu
+      //proses enkripsi dulu baru upload
     }
   }
 };

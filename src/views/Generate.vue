@@ -29,10 +29,11 @@
 
 <script>
 import axios from 'axios';
+import * as openpgp from 'openpgp';
 import { Buffer } from 'buffer'; //buffer untuk encode decode base64
 import FileSaver  from 'file-saver';
 import Vue from 'vue';
-globalThis.Buffer = Buffer
+globalThis.Buffer = Buffer;
 
 const headers = {
   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -53,6 +54,27 @@ export default {
   },
   methods: {
     generateKey: function () {
+      var username = this.form.username;
+      var email = this.form.email ;
+      var passphrase = this.form.passphrase;
+      console.log(username);
+      generate();
+        async function generate() {
+          const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
+            type: 'ecc', // Type of the key, defaults to ECC
+            curve: 'curve25519', // ECC curve name, defaults to curve25519
+            userIDs: [{ name: username, email: email }], // you can pass multiple user IDs
+            passphrase: passphrase, // protects the private key
+            format: 'armored' // output key format, defaults to 'armored' (other options: 'binary' or 'object')
+          });
+          
+          var blob = new Blob([privateKey], {type: "text/plain;charset=utf-8"});
+          FileSaver.saveAs(blob, username + '.priv');
+
+          var blob = new Blob([publicKey], {type: "text/plain;charset=utf-8"});
+          FileSaver.saveAs(blob, username + '.pub');
+          //save kedua file sukses
+        }
       axios.post("http://localhost:3000/key/generate", this.form)
         .then((res) => {
           console.log(res);
@@ -74,17 +96,7 @@ export default {
             alert("User yang login berbeda dengan email yang didaftarkan");
           }
           else {
-            let keys = res.data.key;
-            let privateKeyEncoded = keys.private;
-            let publicKeyEncoded = keys.public;
-
-            let privateKeyDecoded = Buffer.from(privateKeyEncoded, 'base64').toString('ascii');
-            var blob = new Blob([privateKeyDecoded], {type: "text/plain;charset=utf-8"});
-            FileSaver.saveAs(blob, "privatekey");
-
-            let publicKeyDecoded = Buffer.from(publicKeyEncoded, 'base64').toString('ascii');
-            var blob = new Blob([publicKeyDecoded], {type: "text/plain;charset=utf-8"});
-            FileSaver.saveAs(blob, "publickey");
+            alert("Key Pair telah disimpan pada folder Downloads")
             //gg ini berhasil
           }
         }).catch((error) => {
