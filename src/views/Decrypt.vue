@@ -30,7 +30,10 @@
 <script>
 import axios from 'axios';
 import FileSaver  from 'file-saver';
+import * as openpgp from 'openpgp';
 import Vue from 'vue';
+import { Buffer } from 'buffer'; //buffer untuk encode decode base64
+globalThis.Buffer = Buffer;
 
 // const headers = {
 //   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -54,50 +57,60 @@ export default {
     },
     download: function () {
       const cookieIDpenerima = Vue.$cookies.get("id_user");
-      const formData = new FormData();
-      formData.append('down_code', this.form.down_code);
-      formData.append('pass_txt', this.form.pass_txt);
-      formData.append('key', this.form.key);
-      formData.append('id_penerima', cookieIDpenerima);
-      axios.post("http://localhost:3000/file/decryption", formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }).then((res) => {
-        if (res.data.message === "Validation Failed") {
-          let errors = res.data.errors;
-          let errorMsg = "";
-          if (errors.email.length != 0) {
-            for (let i = 0; i < errors.email.length; i++) {
-              errorMsg += `${errors.email[i]}\n`;
-            }
-          }
-          alert(errorMsg);
-        }
-        else {
-          if(res.data.message == "zip"){
-            let download_link = res.data.download_link;
-            axios({
-              method: 'get',
-              url: 'http://localhost:3000/download/' + download_link,
-              responseType: 'blob'
-            })
-            .then(function (response) {
-              console.log(response.data);
-              var blob = new Blob([response.data], {type: "application/zip"});
-              FileSaver.saveAs(blob, "download.zip");
-            });
-          }else if(res.data.message == "txt"){
-            //code untuk respon txt here
-            var blob = new Blob([res.data.file], {type: "text/plain;charset=utf-8"});
-            FileSaver.saveAs(blob, "decrypted_message.txt");
-          }
-          //gg ini berhasil
-        }
-      }).catch((error) => {
-        console.log(error);
+      const privKeyFile = this.form.key;
+      const passphrase = this.form.pass_txt;
+
+      axios({
+        method: 'get',
+        url: 'http://localhost:3000/download/' + this.form.down_code
       })
+      .then(function (response) {
+        if(response.data.message == 'txt'){
+          var file_message = Buffer.from(response.data.download_file, 'base64').toString()
+          
+          dekrip();
+          async function dekrip() {
+            var privKey = await privKeyFile.text();
+            
+            const privateKey = await openpgp.decryptKey({
+              privateKey: await openpgp.readPrivateKey({ armoredKey: privKey}),
+              passphrase
+            });
+
+            const message = await openpgp.readMessage({
+              armoredMessage: file_message // parse armored message
+            });
+            
+            const { data: decrypted } = await openpgp.decrypt({
+              message,
+              decryptionKeys: privateKey
+            });
+
+            console.log(decrypted); // 'Hello, World!'
+            
+            var blob = new Blob([decrypted], {type: "text/plain;charset=utf-8"});
+            FileSaver.saveAs(blob, 'decrypted.txt');
+          }
+        }else if(response.data.message == 'zip'){
+          var myBuffer = Buffer.from(response.data.download_file, 'base64');
+
+          dekrip();
+          async function dekrip() {
+            const encryptedMessage = await openpgp.readMessage({
+                binaryMessage: myBuffer // parse encrypted bytes
+            });
+            const { data: decrypted } = await openpgp.decrypt({
+                message: encryptedMessage,
+                passwords: [passphrase], // decrypt with password
+                format: 'binary' // output as Uint8Array
+            });
+
+            var blob = new Blob([decrypted]);
+            FileSaver.saveAs(blob, 'decrypted.zip');
+          }
+        }
+      });
+
     }
   }
 };

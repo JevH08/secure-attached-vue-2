@@ -42,24 +42,23 @@ const headers = {
 export default {
   name: "Generate",
   data() {
-    const cookieIDpengirim = Vue.$cookies.get("id_user");
     return {
       form: {
         email: '',
         username: '',
         passphrase: '',
-        fk_pengguna: cookieIDpengirim
+        pubkey_upload: ''
       }
     }
   },
   methods: {
     generateKey: function () {
       var username = this.form.username;
-      var email = this.form.email ;
+      var email = this.form.email;
       var passphrase = this.form.passphrase;
-      console.log(username);
       generate();
         async function generate() {
+          const cookieIDpengirim = Vue.$cookies.get("id_user");
           const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
             type: 'ecc', // Type of the key, defaults to ECC
             curve: 'curve25519', // ECC curve name, defaults to curve25519
@@ -73,35 +72,41 @@ export default {
 
           var blob = new Blob([publicKey], {type: "text/plain;charset=utf-8"});
           FileSaver.saveAs(blob, username + '.pub');
+          var base64_pubkey = Buffer.from(publicKey).toString('base64');
           //save kedua file sukses
+          
+          axios.post("http://localhost:3000/key/generate", {
+            email: email,
+            username: username,
+            fk_pengguna: cookieIDpengirim,
+            pubkey_upload: base64_pubkey
+          }).then((res) => {
+            console.log(res);
+            if (res.data.message === "Validation Failed") {
+              let errors = res.data.errors;
+              let errorMsg = "";
+              if (errors.email.length != 0) {
+                for (let i = 0; i < errors.email.length; i++) {
+                  errorMsg += `${errors.email[i]}\n`;
+                }
+              }
+              if (errors.username.length != 0) {
+                for (let i = 0; i < errors.username.length; i++) {
+                  errorMsg += `${errors.username[i]}\n`;
+                }
+              }
+              alert(errorMsg);
+            }else if (res.data.message === "Logged in User and email mismatch") {
+              alert("User yang login berbeda dengan email yang didaftarkan");
+            }
+            else {
+              alert("Key Pair telah disimpan pada folder Downloads")
+              //gg ini berhasil
+            }
+          }).catch((error) => {
+            console.log(error);
+          })
         }
-      axios.post("http://localhost:3000/key/generate", this.form)
-        .then((res) => {
-          console.log(res);
-          if (res.data.message === "Validation Failed") {
-            let errors = res.data.errors;
-            let errorMsg = "";
-            if (errors.email.length != 0) {
-              for (let i = 0; i < errors.email.length; i++) {
-                errorMsg += `${errors.email[i]}\n`;
-              }
-            }
-            if (errors.username.length != 0) {
-              for (let i = 0; i < errors.username.length; i++) {
-                errorMsg += `${errors.username[i]}\n`;
-              }
-            }
-            alert(errorMsg);
-          }else if (res.data.message === "Logged in User and email mismatch") {
-            alert("User yang login berbeda dengan email yang didaftarkan");
-          }
-          else {
-            alert("Key Pair telah disimpan pada folder Downloads")
-            //gg ini berhasil
-          }
-        }).catch((error) => {
-          console.log(error);
-        })
     }
   }
 };
